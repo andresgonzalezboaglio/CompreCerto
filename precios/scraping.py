@@ -179,7 +179,40 @@ def obtener_precios_bistek(searchTerm):
 
 # Función para guardar los productos en la base de datos
 def guardar_precios_bistek():
-    searchTerms = ["cereal"]
+    searchTerms = ["achocolatado", "leite", "creme", "mussarela", "queijo", "presunto", "salame", "cream cheese", "ricota",
+"salsicha", "lassanha", "lasanha", "macarrao", "massa", "spaghetti", "oleo", "azeite", "azeitona", "atum", "sardinha",
+"fralda", "algodao", "lenço", "toalha", "toalinha", "coca", "limpa", "lustra", "agua", "refri", "carne", "frango", "congelado",
+"resfriado", "cubo", "erva", "cha", "cafe", "chocolate", "sobremesa", "talco", "mop", "escova", "pasta", "dental", "pastilha",
+"repelente", "papel", "linguiça", "chorizo", "oliva", "pure", "molho", "atomatado", "amaciante", "lava roupa", "desentupidor",
+"desodorante", "desodorizador", "acendedor", "isqueiro", "fosforo", "vela", "carvao", "lenha", "assado", "churrasco", "lombo",
+"coxao", "patinho", "quadril", "pernil", "peito", "linguado", "asa", "vagem", "moida", "suino", "suina", "cordeiro", "milanesa",
+"sobrecoxa", "coxinha", "nuggets", "empanados", "file", "filezinho", "moela", "galo", "galinha", "peru", "passarinho", "coraçao",
+"ovo", "tomate", "alface", "rucula", "radite", "radiche", "repolho", "espinafre", "beterraba", "couve", "beringela", "batata",
+"doce", "aipim", "mandioca", "mortadela", "paleta", "mandioquinha", "alho", "salsa", "salsinha", "tabasco", "masionese", "ketchup",
+"chao", "perfume", "lavanda", "cheiro", "pimentao", "poro", "cebola", "cebolinha", "maça", "banana", "pessego", "pera", "uva", "abobora",
+"abobrinha", "moranga", "morango", "mirtilo", "ameixa", "amora", "cereja", "cranberry", "chuchu", "kiwi", "abacaxi", "abacate", "faca",
+"garfo", "colher", "prato", "copo", "taça", "xicara", "feijao", "arroz", "lentilha", "ervilha", "milho", "amedoim", "amendoa", "avela",
+"noz", "figado", "pate", "shampoo", "condicionador", "esmalte", "removedor", "galeto", "bolo", "mistura", "fermento", "pudim",
+"bolacha", "cracker", "sal", "cookie", "bombom", "bombon", "marshmellow", "bala", "guloseima", "cigarro", "rom", "ron",
+"vodka", "tequila", "energizante", "espumante", "vinho", "cachaça", "cana", "whiskey", "whisky", "fernet", "aperitivo", "limao",
+"melao", "mamao", "melancia", "manga", "pitaia", "goiaba", "guarana", "acai", "sabao", "sabonete", "espuma", "aparelho", "loçao",
+"gel", "mel", "farinha", "farofa", "tempero", "condimento", "pizza", "pastel", "cerveja", "vassoura", "saco", "lixo", "suco",
+"sumo", "pao", "panetonne", "geleia", "peixe", "peixito", "bolinho", "bacalhau", "forma", "gelatina", "light", "diet", "tomada",
+"po", "pe", "barra", "mondongo", "grao", "granola", "hamburguer", "tamara", "rim", "rib", "nectarina", "tangerina",
+"bergamota", "laranja", "maracuja", "compita", "amido", "açucar", "adoçante", "gluten", "lactose", "conhaque", "saque", "parrilla",
+"caldo", "brocoli", "pepino", "cenoura", "gengibre", "tomatinho", "acerola", "gelo", "picole", "sorvete", "baunilha", "kids",
+"vegano", "cuca", "bolsa", "facilitador", "cloro", "clarificante", "liquido", "suporte", "inceticida", "saponaceo", "pano",
+"flanela","redutor", "elevador", "caixa", "termica", "bomba", "cuja", "tomada", "extensao", "chuveiro", "ducha", "resistencia",
+"plugue", "haste", "silicone", "fluido", "lubricante", "aromatizante", "embaçante", "cera", "preteador", "polidor", "odorizador",
+"estopa", "revitalizador", "guardanapo", "lampada", "pilha", "luva", "pote", "incenso", "folha", "filme", "cantil", "jogo", "tabua",
+"concha", "alimento", "raçao", "kanikama", "camarao", "tirinha", "salmao", "nata", "requeijao", "banha", "cotagge", "fondue",
+"iogurte", "pururuca", "bacon", "torresmo", "apresuntado", "feijoada", "pepperoni", "copa", "lanche", "levissimo", "choripan",
+"embutido", "salaminho", "petisco", "salgadinhos", "snack", "aveia", "ravioli", "capeletti", "rolo", "rodo", "nhoque", "parafuso",
+"tortelloni", "manteiga", "margarina", "soja", "pipoca", "flan", "ninho", "condensado", "chopp", "isotonico", "polpa", "polvo",
+"vinagre", "acetto", "recheio", "glucose", "brigadeiro", "beijinho", "confeito", "cobertura", "flocos", "granulado", "manjar",
+"aroma", "bebida", "canela", "curry", "cravo", "tomilho", "bicarbonato", "anis", "camomila", "chimarrao", "ice", "keep",
+"passata", "tapioca", "sagu", "absorvente", "protetor", "curativo", "chupeta", "mamadeira", "bico", "lixa", "alicate", "palito",
+"tesoura", "hidratante", "pente", "enxaguante", "fio", "fita", "folhado", "rap", "alfajor", "tortilha", "rocambole", "torta", "tinta"]
 
     resumen_guardados = {}
 
