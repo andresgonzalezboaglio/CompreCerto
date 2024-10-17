@@ -4,6 +4,19 @@ from urllib.parse import quote_plus
 from django.utils import timezone
 import json
 from bs4 import BeautifulSoup
+import re
+
+
+# Función para extraer cantidad y unidad de medida del nombre del producto
+def extraer_peso_y_unidad(nombre_producto):
+    if nombre_producto:  # Verificar si el nombre del producto no es None
+        # Buscar cantidad seguida o separada de la unidad de medida (g, kg, ml, l, litro, unid, etc.)
+        match = re.search(r'(\d+)\s*(g|kg|ml|l|litro|unid|u)', nombre_producto.lower())
+        if match:
+            cantidad = match.group(1)  # Captura la cantidad
+            unidad_medida = match.group(2)  # Captura la unidad de medida
+            return float(cantidad), unidad_medida
+    return None, None
 
 
 # Función para obtener precios de Bistek desde el HTML
@@ -40,12 +53,17 @@ def obtener_precios_bistek(searchTerm):
                             precio = producto.get('offers', {}).get('lowPrice')
                             id_origen = producto.get('sku')
 
+                            # Extraer cantidad y unidad de medida del nombre
+                            cantidad, unidad_medida = extraer_peso_y_unidad(nombre)
+
                             if nombre and precio:
                                 productos_extraidos.append({
                                     'nombre': nombre,
                                     'marca': marca or "Sin marca",
                                     'precio': float(precio),
-                                    'id_origen': id_origen
+                                    'id_origen': id_origen,
+                                    'cantidad': cantidad,
+                                    'unidad_medida': unidad_medida
                                 })
 
                         next_link = soup.find('link', {'rel': 'next'})
@@ -73,7 +91,7 @@ def obtener_precios_bistek(searchTerm):
 
 # Función para guardar los productos en la base de datos y en el historial
 def guardar_precios_bistek():
-    searchTerms = ["alfajor"]
+    searchTerms = ["achocolatado", "leite", "creme", "mussarela"]
 
     resumen_guardados = {}
 
@@ -92,6 +110,8 @@ def guardar_precios_bistek():
             marca = producto['marca']
             precio = producto['precio']
             id_origen = producto['id_origen']
+            cantidad = producto['cantidad']
+            unidad_medida = producto['unidad_medida']
 
             # Obtener el producto existente para obtener el precio anterior
             producto_existente = Producto.objects.filter(
@@ -109,6 +129,8 @@ def guardar_precios_bistek():
                     'id_origen': id_origen,
                     'marca': marca.strip(),
                     'precio_actual': precio,
+                    'cantidad': cantidad,
+                    'unidad_medida': unidad_medida,
                     'fecha_captura': timezone.now(),
                     'fecha_fin': None
                 }
@@ -121,8 +143,8 @@ def guardar_precios_bistek():
                 marca=marca.strip(),
                 precio_anterior=precio_anterior,
                 precio_actual=precio,
-                cantidad=producto_existente.cantidad if producto_existente else None,
-                unidad_medida=producto_existente.unidad_medida if producto_existente else None,
+                cantidad=cantidad,
+                unidad_medida=unidad_medida,
                 categoria=producto_existente.categoria if producto_existente else None,
                 supermercado=supermercado,
                 fecha_captura=timezone.now()
