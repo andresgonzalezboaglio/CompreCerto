@@ -5,8 +5,6 @@ from django.utils import timezone
 import json
 from bs4 import BeautifulSoup
 import re
-from decimal import Decimal
-
 
 # Función para extraer cantidad y unidad de medida del nombre del producto
 def extraer_peso_y_unidad(nombre_producto):
@@ -17,7 +15,7 @@ def extraer_peso_y_unidad(nombre_producto):
     return None, None
 
 
-# Función para obtener precios de Bistek
+# Función para obtener precios de Bistek desde el HTML
 def obtener_precios_bistek(searchTerm):
     encoded_term = quote_plus(searchTerm)
     url = f'https://www.bistek.com.br/{encoded_term}?map=ft'
@@ -32,12 +30,16 @@ def obtener_precios_bistek(searchTerm):
             soup = BeautifulSoup(response.content, 'html.parser')
             script_tags = soup.find_all('script')
 
-            for script_tag in script_tags:
+            for i, script_tag in enumerate(script_tags):
                 try:
                     data = json.loads(script_tag.string)
 
                     if 'itemListElement' in data:
                         productos = data.get('itemListElement', [])
+
+                        if not productos:
+                            break
+
                         for item in productos:
                             producto = item.get('item', {})
                             nombre = producto.get('name')
@@ -69,26 +71,26 @@ def obtener_precios_bistek(searchTerm):
                 except (json.JSONDecodeError, TypeError):
                     continue
 
-            if not productos_extraidos:
-                break
-
         else:
+            print(f"Error en la solicitud: {response.status_code}")
             break
 
     return productos_extraidos
 
 
-# Función para guardar los productos en la base de datos
+# Función para guardar los productos en la base de datos y en el historial
 def guardar_precios_bistek():
-    searchTerms = ["canela"]  # Puedes cambiar los términos aquí
+
+    searchTerms = ["azeitona"]
 
     for searchTerm in searchTerms:
         productos = obtener_precios_bistek(searchTerm)
-
         supermercado, _ = Supermercado.objects.get_or_create(
             nombre="Bistek",
             direccion="R. Amazonas, 810 - Torres, RS, 95560-000"
         )
+
+        productos_guardados = 0
 
         for producto in productos:
             nombre = producto['nombre']
@@ -99,7 +101,7 @@ def guardar_precios_bistek():
             unidad_medida = producto['unidad_medida']
 
             producto_existente = Producto.objects.filter(
-                nombre=nombre.strip(),
+                id_origen=id_origen,
                 supermercado=supermercado
             ).first()
 
@@ -109,10 +111,10 @@ def guardar_precios_bistek():
                 continue
 
             producto_obj, created = Producto.objects.update_or_create(
-                nombre=nombre.strip(),
+                id_origen=id_origen,
                 supermercado=supermercado,
                 defaults={
-                    'id_origen': id_origen,
+                    'nombre': nombre.strip(),
                     'marca': marca.strip(),
                     'precio_actual': precio,
                     'cantidad': cantidad,
@@ -137,5 +139,7 @@ def guardar_precios_bistek():
                     fecha_aumento=timezone.now() if precio > precio_anterior else None
                 )
 
-        print(f"BISTEK: Se han guardado productos para el término '{searchTerm}'.")
+            productos_guardados += 1
+
+        print(f"BISTEK: Se guardaron {productos_guardados} productos para el término '{searchTerm}'.")
 
