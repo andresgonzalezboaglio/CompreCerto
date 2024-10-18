@@ -70,7 +70,7 @@ def obtener_precios_bistek(searchTerm):
                         if next_link:
                             pagina_actual += 1
                         else:
-                            print(f"Alcanzada la última página ({pagina_actual}) para {searchTerm}.")
+                            print(f"BISTECK: Alcanzada la última página ({pagina_actual}) para {searchTerm}.")
                             return productos_extraidos
 
                         break
@@ -91,7 +91,7 @@ def obtener_precios_bistek(searchTerm):
 
 # Función para guardar los productos en la base de datos y en el historial
 def guardar_precios_bistek():
-    searchTerms = ["achocolatado", "leite", "creme", "mussarela"]
+    searchTerms = ["canela"]
 
     resumen_guardados = {}
 
@@ -156,11 +156,11 @@ def guardar_precios_bistek():
 
     print("Resumen final de productos guardados:")
     for term, count in resumen_guardados.items():
-        print(f"Se han guardado/actualizado {count} productos para el término '{term}'.")
+        print(f"BISTECK: Se han guardado/actualizado {count} productos para el término '{term}'.")
 
 
 # Ejemplo de cómo llamarlo
-# guardar_precios_bistek()
+guardar_precios_bistek()
 
 """
 -------------------------------------------STOCK CENTER
@@ -297,9 +297,9 @@ def obtener_y_guardar_ofertas_stock_center(searchTerms):
 
     print("Resumen final de productos guardados:")
     for term, count in resumen_guardados.items():
-        print(f"Se han guardado/actualizado {count} productos para el término '{term}'.")
+        print(f"STOCK CENTER: Se han guardado/actualizado {count} productos para el término '{term}'.")
 
 
 # Ejemplo de cómo llamarlo
-searchTerms = ["carne"]
+searchTerms = ["canela"]
 obtener_y_guardar_ofertas_stock_center(searchTerms)
