@@ -5,6 +5,8 @@ from django.utils import timezone
 import json
 from bs4 import BeautifulSoup
 import re
+from .search_terms import searchTerms
+from decimal import Decimal  # Asegurarnos de usar Decimal para precisión en comparaciones
 
 # Función para extraer cantidad y unidad de medida del nombre del producto
 def extraer_peso_y_unidad(nombre_producto):
@@ -13,7 +15,6 @@ def extraer_peso_y_unidad(nombre_producto):
         if match:
             return float(match.group(1)), match.group(2)
     return None, None
-
 
 # Función para obtener precios de Bistek desde el HTML
 def obtener_precios_bistek(searchTerm):
@@ -56,7 +57,7 @@ def obtener_precios_bistek(searchTerm):
                                 productos_extraidos.append({
                                     'nombre': nombre,
                                     'marca': marca or "Sin marca",
-                                    'precio': float(precio),
+                                    'precio': Decimal(str(precio)),  # Convertir el precio a Decimal
                                     'id_origen': id_origen,
                                     'cantidad': cantidad,
                                     'unidad_medida': unidad_medida
@@ -77,19 +78,15 @@ def obtener_precios_bistek(searchTerm):
 
     return productos_extraidos
 
-
 # Función para guardar los productos en la base de datos y en el historial
 def guardar_precios_bistek():
-
-    searchTerms = ["azeitona"]
+    supermercado, _ = Supermercado.objects.get_or_create(
+        nombre="Bistek",
+        direccion="R. Amazonas, 810 - Torres, RS, 95560-000"
+    )
 
     for searchTerm in searchTerms:
         productos = obtener_precios_bistek(searchTerm)
-        supermercado, _ = Supermercado.objects.get_or_create(
-            nombre="Bistek",
-            direccion="R. Amazonas, 810 - Torres, RS, 95560-000"
-        )
-
         productos_guardados = 0
 
         for producto in productos:
@@ -100,46 +97,56 @@ def guardar_precios_bistek():
             cantidad = producto['cantidad']
             unidad_medida = producto['unidad_medida']
 
+            # Obtener el producto existente basándonos en id_origen y supermercado
             producto_existente = Producto.objects.filter(
                 id_origen=id_origen,
                 supermercado=supermercado
             ).first()
 
-            precio_anterior = producto_existente.precio_actual if producto_existente else 0
+            # Si el producto ya existe
+            if producto_existente:
+                # Verificar si el precio es exactamente igual (compara como Decimal)
+                if Decimal(producto_existente.precio_actual) == precio:
+                    # Si el precio es el mismo, no hacer nada
+                    continue
 
-            if producto_existente and producto_existente.precio_actual == precio:
-                continue
+                # Si el precio ha cambiado, actualizar y registrar el historial
+                precio_anterior = producto_existente.precio_actual
 
-            producto_obj, created = Producto.objects.update_or_create(
-                id_origen=id_origen,
-                supermercado=supermercado,
-                defaults={
-                    'nombre': nombre.strip(),
-                    'marca': marca.strip(),
-                    'precio_actual': precio,
-                    'cantidad': cantidad,
-                    'unidad_medida': unidad_medida,
-                    'fecha_captura': timezone.now(),
-                    'fecha_aumento': None
-                }
-            )
+                # Actualizar el producto en la tabla Producto
+                producto_existente.precio_actual = precio
+                producto_existente.fecha_captura = timezone.now()
+                producto_existente.save()
 
-            if not created and precio != precio_anterior:
+                # Guardar en el historial si el precio ha cambiado
                 Producto_Hist.objects.create(
-                    producto=producto_obj,
+                    producto=producto_existente,
                     nombre=nombre.strip(),
-                    marca=marca.strip(),
+                    marca=marca.strip() if marca else None,
                     precio_anterior=precio_anterior,
                     precio_actual=precio,
                     cantidad=cantidad,
                     unidad_medida=unidad_medida,
-                    categoria=producto_existente.categoria if producto_existente else None,
+                    categoria=producto_existente.categoria,
                     supermercado=supermercado,
                     fecha_captura=timezone.now(),
                     fecha_aumento=timezone.now() if precio > precio_anterior else None
                 )
 
+            else:
+                # Si el producto no existe, crearlo
+                Producto.objects.create(
+                    id_origen=id_origen,
+                    supermercado=supermercado,
+                    nombre=nombre.strip(),
+                    marca=marca.strip() if marca else None,
+                    precio_actual=precio,
+                    cantidad=cantidad,
+                    unidad_medida=unidad_medida,
+                    fecha_captura=timezone.now(),
+                    fecha_aumento=None
+                )
+
             productos_guardados += 1
 
         print(f"BISTEK: Se guardaron {productos_guardados} productos para el término '{searchTerm}'.")
-

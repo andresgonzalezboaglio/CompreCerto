@@ -1,5 +1,5 @@
 from .scraping_bistek import guardar_precios_bistek
-from .scraping_stockcenter import obtener_y_guardar_ofertas_stock_center
+from .scraping_stockcenter import guardar_productos_stock_center
 
 
 def ejecutar_scraping_bistek():
@@ -7,10 +7,9 @@ def ejecutar_scraping_bistek():
 
 
 def ejecutar_scraping_stockcenter():
-    obtener_y_guardar_ofertas_stock_center()
+    guardar_productos_stock_center()
 
 
 def ejecutar_scraping():
     ejecutar_scraping_bistek()
     ejecutar_scraping_stockcenter()
-
