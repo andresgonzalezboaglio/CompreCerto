@@ -4,10 +4,8 @@ from urllib.parse import quote_plus
 from django.utils import timezone
 import re
 from decimal import Decimal
-from .search_terms import searchTerms  # Importamos los términos de búsqueda
-
-# Token para autenticación (Bearer token)
-BEARER_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJ2aXBjb21tZXJjZSIsImF1ZCI6ImFwaS1hZG1pbiIsInN1YiI6IjZiYzQ4NjdlLWRjYTktMTFlOS04NzQyLTAyMGQ3OTM1OWNhMCIsInZpcGNvbW1lcmNlQ2xpZW50ZUlkIjpudWxsLCJpYXQiOjE3Mjg5NDk4MDQsInZlciI6MSwiY2xpZW50IjpudWxsLCJvcGVyYXRvciI6bnVsbCwib3JnIjoiMTMwIn0.PLi7L_TQlx-qZSbY5OfTDB_zpzwXMKTjqZ4DlVVKPbkeYLQ9aYj9k-Lsg1HM4Sdg8vjcLH7GITI6Th-aBMQkSQ'
+from .search_terms import searchTerms
+from .config import STOCK_CENTER_TOKEN
 
 
 # Función para extraer cantidad y unidad de medida del nombre del producto
@@ -23,7 +21,7 @@ def obtener_ofertas_stock_center(searchTerm):
     encoded_term = quote_plus(searchTerm)
     base_url = f"https://api-loja.stokonline.com.br/v1/loja/buscas/produtos/filial/1/centro_distribuicao/16/termo/{encoded_term}"
     headers = {
-        'Authorization': f'Bearer {BEARER_TOKEN}'
+        'Authorization': f'Bearer {STOCK_CENTER_TOKEN}'
     }
 
     productos_extraidos = []
