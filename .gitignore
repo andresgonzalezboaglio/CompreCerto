@@ -1,0 +1,19 @@
+# Default ignored files
+# Archivos compilados de Python
+*.pyc
+__pycache__/
+
+# Entornos virtuales
+venv/
+.venv/
+
+# Archivos de PyCharm y otros IDEs
+.idea/
+.vscode/
+
+# Archivos de logs
+*.log
+
+# Bases de datos SQLite
+*.sqlite3
+
