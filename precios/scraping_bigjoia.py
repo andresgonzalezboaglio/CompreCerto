@@ -92,6 +92,7 @@ def obtener_precios_bigjoia(searchTerm):
 
     return productos_extraidos
 
+
 # Función para guardar los productos de Big Joia en la base de datos
 def guardar_precios_bigjoia():
     supermercado, _ = Supermercado.objects.get_or_create(
