@@ -20,6 +20,7 @@ def extraer_peso_y_unidad(nombre_producto):
 def convertir_precio(precio):
     return Decimal(precio).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
+
 # Configuración de Big Joia
 url_base = "https://search.osuper.com.br/ecommerce_products_production/_search"
 headers = {
@@ -67,7 +68,12 @@ def obtener_precios_bigjoia(searchTerm):
                 marca = producto.get('brandName') or "Sin marca"
                 precio = convertir_precio(producto['pricing'][0]['price'])  # Convertimos a Decimal y redondeamos
                 id_origen = producto.get('objectID')
-                categoria = data['extraData']['categories'][0]['key'].split(':')[1]  # Tomar solo la primera categoría
+
+                # Verificar si hay categorías
+                if data['extraData']['categories']:
+                    categoria = data['extraData']['categories'][0]['key'].split(':')[1]  # Tomar solo la primera categoría
+                else:
+                    categoria = "Sin categoría"  # Asignar una categoría por defecto
 
                 # Extraer cantidad y unidad_medida del nombre
                 cantidad, unidad_medida = extraer_peso_y_unidad(nombre)

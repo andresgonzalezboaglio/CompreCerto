@@ -4,6 +4,7 @@ from .scraping_baggio import guardar_precios_baggio
 from .scraping_asun import obtener_y_guardar_ofertas_asun
 from .scraping_bigjoia import guardar_precios_bigjoia
 
+
 def ejecutar_scraping_bistek():
     guardar_precios_bistek()
 
