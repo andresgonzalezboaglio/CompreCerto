@@ -1,3 +1,3 @@
 # search_terms.py
 
-searchTerms = ["azeitona"]  # Agrega más términos según sea necesario
+searchTerms = ["leite"]  # Agrega más términos según sea necesario
