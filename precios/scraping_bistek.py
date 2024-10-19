@@ -8,6 +8,7 @@ import re
 from .search_terms import searchTerms
 from decimal import Decimal  # Asegurarnos de usar Decimal para precisión en comparaciones
 
+
 # Función para extraer cantidad y unidad de medida del nombre del producto
 def extraer_peso_y_unidad(nombre_producto):
     if nombre_producto:
@@ -15,6 +16,7 @@ def extraer_peso_y_unidad(nombre_producto):
         if match:
             return float(match.group(1)), match.group(2)
     return None, None
+
 
 # Función para obtener precios de Bistek desde el HTML
 def obtener_precios_bistek(searchTerm):
@@ -77,6 +79,7 @@ def obtener_precios_bistek(searchTerm):
             break
 
     return productos_extraidos
+
 
 # Función para guardar los productos en la base de datos y en el historial
 def guardar_precios_bistek():
