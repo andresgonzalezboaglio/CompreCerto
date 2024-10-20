@@ -83,7 +83,11 @@ def guardar_productos_stock_center():
             precio = Decimal(str(producto['precio']))  # Convertimos el precio a Decimal
             id_origen = producto['id_origen']
             cantidad = producto['cantidad']
-            unidad_medida = producto['unidad_medida'].upper()
+            unidad_medida = producto.get('unidad_medida')
+            if unidad_medida is not None:
+                unidad_medida = unidad_medida.upper()
+            else:
+                unidad_medida = None
 
             producto_existente = Producto.objects.filter(
                 id_origen=id_origen,

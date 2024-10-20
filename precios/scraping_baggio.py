@@ -94,7 +94,11 @@ def guardar_precios_baggio():
             precio = producto['precio']  # El precio ya es Decimal
             id_origen = producto['id_origen']
             cantidad = producto['cantidad']
-            unidad_medida = producto['unidad_medida'].upper()
+            unidad_medida = producto.get('unidad_medida')  # Usamos get para evitar KeyError
+            if unidad_medida is not None:
+                unidad_medida = unidad_medida.upper()
+            else:
+                unidad_medida = None
 
             # Obtener el producto existente basándonos en id_origen y supermercado
             producto_existente = Producto.objects.filter(

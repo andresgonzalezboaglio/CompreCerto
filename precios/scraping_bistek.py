@@ -18,6 +18,7 @@ USER_AGENTS = [
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.5359.124 Safari/537.36',
 ]
 
+
 # Función para extraer cantidad y unidad de medida del nombre del producto
 def extraer_peso_y_unidad(nombre_producto):
     if nombre_producto:
@@ -26,9 +27,11 @@ def extraer_peso_y_unidad(nombre_producto):
             return float(match.group(1)), match.group(2)
     return None, None
 
+
 # Función para convertir precio a Decimal y redondear
 def convertir_precio(precio):
     return Decimal(precio).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
 
 # Función para obtener precios de Bistek desde el HTML
 def obtener_precios_bistek(searchTerm):
@@ -116,7 +119,11 @@ def guardar_precios_bistek():
             precio = producto['precio']
             id_origen = producto['id_origen']
             cantidad = producto['cantidad']
-            unidad_medida = producto['unidad_medida'].upper()
+            unidad_medida = producto.get('unidad_medida')  # Usamos get para evitar KeyError
+            if unidad_medida is not None:
+                unidad_medida = unidad_medida.upper()
+            else:
+                unidad_medida = None
 
             # Obtener el producto existente basándonos en id_origen y supermercado
             producto_existente = Producto.objects.filter(
