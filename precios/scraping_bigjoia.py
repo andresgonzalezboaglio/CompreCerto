@@ -116,7 +116,7 @@ def guardar_precios_bigjoia():
             precio = producto['precio']
             id_origen = producto['id_origen']
             cantidad = producto['cantidad']
-            unidad_medida = producto['unidad_medida']
+            unidad_medida = producto['unidad_medida'].upper()
             categoria = producto['categoria'].upper()
 
             # Obtener el producto existente basándonos en id_origen y supermercado
