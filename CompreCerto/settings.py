@@ -74,10 +74,12 @@ WSGI_APPLICATION = 'CompreCerto.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
+# cambiar a comprecerto para master
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'comprecerto',
+        'NAME': 'comprecerto_test',
         'USER': 'postgres',
         'PASSWORD': 'arkan',
         'HOST': 'localhost',

@@ -98,6 +98,7 @@ def obtener_precios_bistek(searchTerm):
 
     return productos_extraidos
 
+
 # Función para guardar los productos en la base de datos y en el historial
 def guardar_precios_bistek():
     supermercado, _ = Supermercado.objects.get_or_create(
@@ -110,8 +111,8 @@ def guardar_precios_bistek():
         productos_guardados = 0
 
         for producto in productos:
-            nombre = producto['nombre']
-            marca = producto['marca']
+            nombre = producto['nombre'].upper()
+            marca = producto['marca'].upper()
             precio = producto['precio']
             id_origen = producto['id_origen']
             cantidad = producto['cantidad']

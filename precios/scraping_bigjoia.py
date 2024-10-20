@@ -111,13 +111,13 @@ def guardar_precios_bigjoia():
         productos_guardados = 0
 
         for producto in productos:
-            nombre = producto['nombre']
-            marca = producto['marca']
+            nombre = producto['nombre'].upper()
+            marca = producto['marca'].upper()
             precio = producto['precio']
             id_origen = producto['id_origen']
             cantidad = producto['cantidad']
             unidad_medida = producto['unidad_medida']
-            categoria = producto['categoria']
+            categoria = producto['categoria'].upper()
 
             # Obtener el producto existente basándonos en id_origen y supermercado
             producto_existente = Producto.objects.filter(

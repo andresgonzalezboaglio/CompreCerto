@@ -74,7 +74,7 @@ def guardar_productos_asun(productos, supermercado):
     productos_guardados = 0
 
     for producto in productos:
-        nombre = producto.get('descripcion', '').strip()
+        nombre = producto.get('descripcion', '').strip().upper()
         precio = producto.get('precio')  # El precio ya está convertido a Decimal
         id_origen = producto['id_origen']
         cantidad = producto['cantidad']

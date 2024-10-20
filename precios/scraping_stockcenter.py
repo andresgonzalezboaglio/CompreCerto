@@ -79,7 +79,7 @@ def guardar_productos_stock_center():
         productos_guardados = 0
 
         for producto in productos:
-            nombre = producto['descripcion']
+            nombre = producto['descripcion'].upper()
             precio = Decimal(str(producto['precio']))  # Convertimos el precio a Decimal
             id_origen = producto['id_origen']
             cantidad = producto['cantidad']

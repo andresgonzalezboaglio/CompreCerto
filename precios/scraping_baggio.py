@@ -90,7 +90,7 @@ def guardar_precios_baggio():
         productos_guardados = 0
 
         for producto in productos:
-            nombre = producto['nombre']
+            nombre = producto['nombre'].upper()
             precio = producto['precio']  # El precio ya es Decimal
             id_origen = producto['id_origen']
             cantidad = producto['cantidad']
