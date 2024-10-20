@@ -1,3 +1,5 @@
 # search_terms.py
 
-searchTerms = ["tomilho", "pente", "balde"]  # Agrega más términos según sea necesario
+searchTerms = [
+        "arroz", "feijao", "macarrao", "oleo", "farinha", "acucar", "sal", "cafe", "biscoito", "chocolate", "molho de tomate", "conservas", "azeite"
+    ]
