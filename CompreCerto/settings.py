@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'CompreCerto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'comprecerto',
+        'NAME': 'comprecerto_test',
         'USER': 'postgres',
         'PASSWORD': 'arkan',
         'HOST': 'localhost',

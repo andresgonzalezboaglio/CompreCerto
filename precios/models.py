@@ -11,7 +11,7 @@ class Supermercado(models.Model):
 
 
 class Producto(models.Model):
-    id_origen = models.CharField(max_length=255, unique=True)  # Hacemos que id_origen sea único
+    id_origen = models.CharField(max_length=255, unique=True)
     nombre = models.CharField(max_length=255)
     marca = models.CharField(max_length=255, null=True, blank=True)
     supermercado = models.ForeignKey(Supermercado, on_delete=models.CASCADE)
@@ -20,7 +20,11 @@ class Producto(models.Model):
     unidad_medida = models.CharField(max_length=50, null=True, blank=True)
     categoria = models.CharField(max_length=255, null=True, blank=True)
     fecha_captura = models.DateTimeField()
-    fecha_aumento = models.DateTimeField(null=True, blank=True)  # Actualizamos el campo fecha_fin a fecha_aumento
+    fecha_aumento = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)  # Nueva columna
+
+    def __str__(self):
+        return f'{self.nombre} ({self.supermercado.nombre})'
 
     def __str__(self):
         return f'{self.nombre} ({self.supermercado.nombre})'
