@@ -88,6 +88,7 @@ def guardar_productos_stock_center():
                 unidad_medida = unidad_medida.upper()
             else:
                 unidad_medida = None
+            is_active = producto.get('disponivel', False)
 
             producto_existente = Producto.objects.filter(
                 id_origen=id_origen,
@@ -108,7 +109,8 @@ def guardar_productos_stock_center():
                     'cantidad': cantidad,
                     'unidad_medida': unidad_medida,
                     'fecha_captura': timezone.now(),
-                    'fecha_aumento': None
+                    'fecha_aumento': None,
+                    'is_active': is_active
                 }
             )
 

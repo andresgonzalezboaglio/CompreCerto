@@ -58,8 +58,11 @@ def obtener_precios_bistek(searchTerm):
                         data = json.loads(script_tag.string)
                         if 'itemListElement' in data:
                             productos = data.get('itemListElement', [])
-                            if not productos:
-                                break
+
+                            if not productos:  # Manejo del array vacío
+                                print(
+                                    f"No se encontraron productos para el término '{searchTerm}' en la página {pagina_actual}.")
+                                return productos_extraidos  # Retorna la lista vacía
 
                             for item in productos:
                                 producto = item.get('item', {})
