@@ -6,14 +6,12 @@ from decimal import Decimal
 from .search_terms import searchTerms
 from .config import ASUN_BEARER_TOKEN
 
-
 # Función para extraer cantidad y unidad de medida del nombre del producto
 def extraer_peso_y_unidad(nombre_producto):
     match = re.search(r'(\d+)\s*(g|kg|ml|l|litro|unid|u)', nombre_producto.lower())
     if match:
         return float(match.group(1)), match.group(2)
     return None, None
-
 
 # Función para obtener ofertas desde Asun con paginación
 def obtener_ofertas_asun(searchTerm):
@@ -37,13 +35,10 @@ def obtener_ofertas_asun(searchTerm):
             paginator = data.get('paginator', {})
 
             for producto in productos:
-                # Solo consideramos productos disponibles
-                if not producto.get('disponivel', False):
-                    continue
-
                 descripcion = producto.get('descricao')
                 precio = Decimal(str(producto['preco']))
                 id_origen = producto['sku']
+                is_active = producto.get('disponivel', False)  # Obtener el estado de disponibilidad
 
                 # Extraer cantidad y unidad de medida del nombre
                 cantidad, unidad_medida = extraer_peso_y_unidad(descripcion)
@@ -54,7 +49,8 @@ def obtener_ofertas_asun(searchTerm):
                     'id_origen': id_origen,
                     'cantidad': cantidad,
                     'unidad_medida': unidad_medida,
-                    'supermercado': 'Asun'
+                    'supermercado': 'Asun',
+                    'is_active': is_active  # Asegúrate de incluir is_active
                 })
 
             total_pages = paginator.get('total_pages', 1)
@@ -68,7 +64,6 @@ def obtener_ofertas_asun(searchTerm):
 
     return productos_extraidos
 
-
 # Función para guardar productos en la base de datos y en el historial
 def guardar_productos_asun(productos, supermercado):
     productos_guardados = 0
@@ -79,6 +74,8 @@ def guardar_productos_asun(productos, supermercado):
         id_origen = producto['id_origen']
         cantidad = producto['cantidad']
         unidad_medida = producto.get('unidad_medida')  # Usamos get para evitar KeyError
+        is_active = producto.get('is_active', False)  # Obtener estado de disponibilidad
+
         if unidad_medida is not None:
             unidad_medida = unidad_medida.upper()
         else:
@@ -90,33 +87,38 @@ def guardar_productos_asun(productos, supermercado):
             supermercado=supermercado
         ).first()
 
-        # Verificar si el producto ya existe y si el precio cambió
+        # Verificar si el producto ya existe
         if producto_existente:
-            # Si el precio es el mismo, no hacer nada
-            if producto_existente.precio_actual == precio:
-                continue
+            # Actualizar is_active basado en la disponibilidad del producto
+            is_active_changed = producto_existente.is_active != is_active
+            producto_existente.is_active = is_active
 
-            # Si el precio cambió, actualizar y guardar en el historial
-            precio_anterior = producto_existente.precio_actual
+            # Verificar si el precio ha cambiado
+            if producto_existente.precio_actual != precio:
+                precio_anterior = producto_existente.precio_actual
 
-            # Actualizar el producto en la tabla Producto
-            producto_existente.precio_actual = precio
-            producto_existente.fecha_captura = timezone.now()
-            producto_existente.save()
+                # Actualizar el producto en la tabla Producto
+                producto_existente.precio_actual = precio
+                producto_existente.fecha_captura = timezone.now()
+                producto_existente.save()
 
-            # Guardar en el historial
-            Producto_Hist.objects.create(
-                producto=producto_existente,
-                nombre=nombre,
-                precio_anterior=precio_anterior,
-                precio_actual=precio,
-                cantidad=cantidad,
-                unidad_medida=unidad_medida,
-                categoria=producto_existente.categoria,
-                supermercado=supermercado,
-                fecha_captura=timezone.now(),
-                fecha_aumento=timezone.now() if precio > precio_anterior else None
-            )
+                # Guardar en el historial
+                Producto_Hist.objects.create(
+                    producto=producto_existente,
+                    nombre=nombre,
+                    precio_anterior=precio_anterior,
+                    precio_actual=precio,
+                    cantidad=cantidad,
+                    unidad_medida=unidad_medida,
+                    categoria=producto_existente.categoria,
+                    supermercado=supermercado,
+                    fecha_captura=timezone.now(),
+                    fecha_aumento=timezone.now() if precio > precio_anterior else None
+                )
+
+            # Si solo cambió la disponibilidad, lo guardamos
+            if is_active_changed:
+                producto_existente.save()  # Guardar el cambio de is_active
 
         else:
             # Si el producto no existe, crearlo
@@ -128,17 +130,16 @@ def guardar_productos_asun(productos, supermercado):
                 cantidad=cantidad,
                 unidad_medida=unidad_medida,
                 fecha_captura=timezone.now(),
-                fecha_aumento=None
+                fecha_aumento=None,
+                is_active=is_active  # Establecer como activo al crearlo
             )
 
         productos_guardados += 1
 
     return productos_guardados
 
-
 # Función principal para obtener y guardar ofertas
 def obtener_y_guardar_ofertas_asun():
-
     supermercado, _ = Supermercado.objects.get_or_create(
         nombre="Asun",
         direccion="Av. Castelo Branco, 1010 - Centro, Torres - RS, 95560-000"
