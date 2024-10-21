@@ -6,12 +6,14 @@ from decimal import Decimal
 from .search_terms import searchTerms
 from .config import ASUN_BEARER_TOKEN
 
+
 # Función para extraer cantidad y unidad de medida del nombre del producto
 def extraer_peso_y_unidad(nombre_producto):
     match = re.search(r'(\d+)\s*(g|kg|ml|l|litro|unid|u)', nombre_producto.lower())
     if match:
         return float(match.group(1)), match.group(2)
     return None, None
+
 
 # Función para obtener ofertas desde Asun con paginación
 def obtener_ofertas_asun(searchTerm):
@@ -63,6 +65,7 @@ def obtener_ofertas_asun(searchTerm):
             break
 
     return productos_extraidos
+
 
 # Función para guardar productos en la base de datos y en el historial
 def guardar_productos_asun(productos, supermercado):
@@ -137,6 +140,7 @@ def guardar_productos_asun(productos, supermercado):
         productos_guardados += 1
 
     return productos_guardados
+
 
 # Función principal para obtener y guardar ofertas
 def obtener_y_guardar_ofertas_asun():
