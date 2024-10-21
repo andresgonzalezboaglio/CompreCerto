@@ -9,7 +9,6 @@ import re
 # Función para extraer cantidad y unidad de medida del nombre del producto
 def extraer_peso_y_unidad(nombre_producto):
     if nombre_producto:
-        # Buscamos patrones de números seguidos de unidades comunes (g, kg, ml, l, etc.)
         match = re.search(r'(\d+\.?\d*)\s*(g|kg|ml|l|litro|unid|u|un)', nombre_producto.lower())
         if match:
             return float(match.group(1)), match.group(2)
@@ -65,27 +64,26 @@ def obtener_precios_bigjoia(searchTerm):
             for edge in data['edges']:
                 producto = edge['node']
                 nombre = producto.get('name')
-                marca = producto.get('brandName') or "Sin marca"
                 precio = convertir_precio(producto['pricing'][0]['price'])  # Convertimos a Decimal y redondeamos
                 id_origen = producto.get('objectID')
 
+                # Obtener el valor de inStock
+                in_stock = producto.get('stock', {}).get('inStock', 0)
+
                 # Verificar si hay categorías
-                if data['extraData']['categories']:
-                    categoria = data['extraData']['categories'][0]['key'].split(':')[1]  # Tomar solo la primera categoría
-                else:
-                    categoria = "Sin categoría"  # Asignar una categoría por defecto
+                categoria = producto.get('category', {}).get('name', 'Sin categoría')
 
                 # Extraer cantidad y unidad_medida del nombre
                 cantidad, unidad_medida = extraer_peso_y_unidad(nombre)
 
                 productos_extraidos.append({
                     'nombre': nombre,
-                    'marca': marca,
                     'precio': precio,
                     'id_origen': id_origen,
                     'cantidad': cantidad,
                     'unidad_medida': unidad_medida,
-                    'categoria': categoria
+                    'categoria': categoria,
+                    'is_active': in_stock > 0  # Establecer is_active según el stock
                 })
 
             # Paginación
@@ -112,16 +110,16 @@ def guardar_precios_bigjoia():
 
         for producto in productos:
             nombre = producto['nombre'].upper()
-            marca = producto['marca'].upper()
             precio = producto['precio']
             id_origen = producto['id_origen']
             cantidad = producto['cantidad']
-            unidad_medida = producto.get('unidad_medida')  # Usamos get para evitar KeyError
+            unidad_medida = producto.get('unidad_medida')
+            categoria = producto['categoria'].upper()
+
             if unidad_medida is not None:
                 unidad_medida = unidad_medida.upper()
             else:
                 unidad_medida = None
-            categoria = producto['categoria'].upper()
 
             # Obtener el producto existente basándonos en id_origen y supermercado
             producto_existente = Producto.objects.filter(
@@ -129,12 +127,15 @@ def guardar_precios_bigjoia():
                 supermercado=supermercado
             ).first()
 
-            # Verificar si el producto ya existe y si el precio cambió
             if producto_existente:
-                # Convertimos ambos precios a Decimal para asegurarnos de que se comparen correctamente
+                # Actualizar is_active basado en la disponibilidad del producto
+                producto_existente.is_active = True  # Siempre se establecerá a True al encontrarlo
+
+                # Verificar si el precio ha cambiado
                 precio_anterior = convertir_precio(producto_existente.precio_actual)
 
                 if precio_anterior == precio:
+                    producto_existente.save()  # Asegúrate de guardar el cambio de is_active
                     continue  # Si el precio es el mismo, no hacer nada
 
                 # Actualizar y guardar en el historial si el precio cambió
@@ -142,11 +143,10 @@ def guardar_precios_bigjoia():
                 producto_existente.fecha_captura = timezone.now()
                 producto_existente.save()
 
-                # Guardar en el historial solo si el precio cambió
+                # Guardar en el historial
                 Producto_Hist.objects.create(
                     producto=producto_existente,
                     nombre=nombre.strip(),
-                    marca=marca.strip(),
                     precio_anterior=precio_anterior,
                     precio_actual=precio,
                     cantidad=cantidad,
@@ -156,20 +156,19 @@ def guardar_precios_bigjoia():
                     fecha_captura=timezone.now(),
                     fecha_aumento=timezone.now() if precio > precio_anterior else None
                 )
-
             else:
-                # Crear el producto si no existe
+                # Si el producto no existe, crearlo
                 Producto.objects.create(
                     id_origen=id_origen,
                     supermercado=supermercado,
                     nombre=nombre.strip(),
-                    marca=marca.strip(),
                     precio_actual=precio,
                     cantidad=cantidad,
                     unidad_medida=unidad_medida,
                     categoria=categoria,
                     fecha_captura=timezone.now(),
-                    fecha_aumento=None
+                    fecha_aumento=None,
+                    is_active=True  # Establecer como activo al crearlo
                 )
 
             productos_guardados += 1
