@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from .models import Producto, Producto_Hist, Supermercado
 from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
-from urllib.parse import quote_plus
+from urllib.parse import quote
 from .search_terms import searchTerms
 import time
 import random
@@ -35,7 +35,7 @@ def convertir_precio(precio):
 
 # Función para obtener precios de Bistek desde el HTML
 def obtener_precios_bistek(searchTerm):
-    encoded_term = quote_plus(searchTerm)
+    encoded_term = quote(searchTerm)
     url = f'https://www.bistek.com.br/{encoded_term}?map=ft'
     productos_extraidos = []
     pagina_actual = 1
@@ -60,8 +60,7 @@ def obtener_precios_bistek(searchTerm):
                             productos = data.get('itemListElement', [])
 
                             if not productos:  # Manejo del array vacío
-                                print(
-                                    f"No se encontraron productos para el término '{searchTerm}' en la página {pagina_actual}.")
+                                print(f"No se encontraron productos para el término '{searchTerm}' en la página {pagina_actual}.")
                                 return productos_extraidos  # Retorna la lista vacía
 
                             for item in productos:
@@ -112,9 +111,25 @@ def guardar_precios_bistek():
         direccion="R. Amazonas, 810 - Torres, RS, 95560-000"
     )
 
+    # Obtener productos existentes con is_active=True
+    productos_existentes = Producto.objects.filter(supermercado=supermercado, is_active=True)
+    productos_activos_ids = {producto.id_origen for producto in productos_existentes}
+
     for searchTerm in searchTerms:
         productos = obtener_precios_bistek(searchTerm)
         productos_guardados = 0
+
+        # Crear un conjunto de IDs de productos que están actualmente disponibles
+        productos_nuevos_ids = {producto['id_origen'] for producto in productos}
+
+        # Actualizar is_active a False para productos que ya no están disponibles
+        for id_origen in productos_activos_ids:
+            if id_origen not in productos_nuevos_ids:
+                Producto.objects.filter(id_origen=id_origen, supermercado=supermercado).update(is_active=False)
+
+        # Actualizar is_active a True para productos que están de nuevo disponibles
+        for id_origen in productos_nuevos_ids:
+            Producto.objects.filter(id_origen=id_origen, supermercado=supermercado).update(is_active=True)
 
         for producto in productos:
             nombre = producto['nombre'].upper()
@@ -171,7 +186,8 @@ def guardar_precios_bistek():
                     cantidad=cantidad,
                     unidad_medida=unidad_medida,
                     fecha_captura=timezone.now(),
-                    fecha_aumento=None
+                    fecha_aumento=None,
+                    is_active=True  # Asegúrate de establecerlo como activo al crearlo
                 )
 
             productos_guardados += 1
