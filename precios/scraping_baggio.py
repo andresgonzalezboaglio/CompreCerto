@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from .models import Producto, Producto_Hist, Supermercado
 from django.utils import timezone
 from .search_terms import searchTerms
-from decimal import Decimal  # Importar Decimal para las comparaciones de precios
+from decimal import Decimal
 import re
 
 
@@ -108,8 +108,12 @@ def guardar_precios_baggio():
 
             # Verificar si el producto ya existe y si el precio cambió
             if producto_existente:
+                # Actualizar is_active basado en la disponibilidad del producto
+                producto_existente.is_active = True  # Siempre será True si está en el response
+
                 # Si el precio es el mismo, no hacer nada
                 if producto_existente.precio_actual == precio:
+                    producto_existente.save()  # Asegúrate de guardar el cambio de is_active
                     continue
 
                 # Si el precio cambió, actualizar y guardar en el historial
@@ -124,17 +128,14 @@ def guardar_precios_baggio():
                 Producto_Hist.objects.create(
                     producto=producto_existente,
                     nombre=nombre.strip(),
-                    marca=producto_existente.marca,  # Usamos la marca que ya tiene el producto
                     precio_anterior=precio_anterior,
                     precio_actual=precio,
                     cantidad=cantidad,
                     unidad_medida=unidad_medida,
-                    categoria=producto_existente.categoria,
                     supermercado=supermercado,
                     fecha_captura=timezone.now(),
                     fecha_aumento=timezone.now() if precio > precio_anterior else None
                 )
-
             else:
                 # Si el producto no existe, crearlo
                 Producto.objects.create(
@@ -145,10 +146,10 @@ def guardar_precios_baggio():
                     unidad_medida=unidad_medida,
                     supermercado=supermercado,
                     fecha_captura=timezone.now(),
-                    fecha_aumento=None
+                    fecha_aumento=None,
+                    is_active=True  # Establecer como activo al crearlo
                 )
 
             productos_guardados += 1
 
         print(f"BAGGIO: Se guardaron {productos_guardados} productos para el término '{searchTerm}'.")
-
