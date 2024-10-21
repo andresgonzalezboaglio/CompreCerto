@@ -7,12 +7,14 @@ from decimal import Decimal
 from .search_terms import searchTerms
 from .config import STOCK_CENTER_TOKEN
 
+
 # Función para extraer cantidad y unidad de medida del nombre del producto
 def extraer_peso_y_unidad(nombre_producto):
     match = re.search(r'(\d+)\s*(g|kg|ml|l|litro|unid|u)', nombre_producto.lower())
     if match:
         return float(match.group(1)), match.group(2)
     return None, None
+
 
 # Función para obtener ofertas desde Stock Center con paginación
 def obtener_ofertas_stock_center(searchTerm):
@@ -66,6 +68,7 @@ def obtener_ofertas_stock_center(searchTerm):
 
     return productos_extraidos
 
+
 # Función para guardar productos en la base de datos y en el historial
 def guardar_productos_stock_center():
     for searchTerm in searchTerms:
@@ -116,7 +119,7 @@ def guardar_productos_stock_center():
                         unidad_medida=unidad_medida,
                         supermercado=supermercado,
                         fecha_captura=timezone.now(),
-                        fecha_aumento=timezone.now() if precio > precio_anterior else None
+                        fecha_variacion=timezone.now() if precio > precio_anterior else None
                     )
                 else:
                     # Si el precio no ha cambiado, solo actualizamos is_active
@@ -131,7 +134,6 @@ def guardar_productos_stock_center():
                     cantidad=cantidad,
                     unidad_medida=unidad_medida,
                     fecha_captura=timezone.now(),
-                    fecha_aumento=None,
                     is_active=is_active  # Establecer como activo al crearlo
                 )
 

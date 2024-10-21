@@ -172,7 +172,7 @@ def guardar_precios_bistek():
                     unidad_medida=unidad_medida,
                     supermercado=supermercado,
                     fecha_captura=timezone.now(),
-                    fecha_aumento=timezone.now() if precio > precio_anterior else None
+                    fecha_variacion=timezone.now() if precio > precio_anterior else None
                 )
 
             else:
@@ -186,7 +186,6 @@ def guardar_precios_bistek():
                     cantidad=cantidad,
                     unidad_medida=unidad_medida,
                     fecha_captura=timezone.now(),
-                    fecha_aumento=None,
                     is_active=True  # Asegúrate de establecerlo como activo al crearlo
                 )
 

@@ -20,7 +20,6 @@ class Producto(models.Model):
     unidad_medida = models.CharField(max_length=50, null=True, blank=True)
     categoria = models.CharField(max_length=255, null=True, blank=True)
     fecha_captura = models.DateTimeField()
-    fecha_aumento = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)  # Nueva columna
 
     def __str__(self):
@@ -41,7 +40,7 @@ class Producto_Hist(models.Model):
     categoria = models.CharField(max_length=255, null=True, blank=True)
     supermercado = models.ForeignKey(Supermercado, on_delete=models.CASCADE)
     fecha_captura = models.DateTimeField(default=timezone.now)
-    fecha_aumento = models.DateTimeField(null=True, blank=True)  # Fecha en la que ocurrió un aumento
+    fecha_variacion = models.DateTimeField(null=True, blank=True)  # Fecha en la que ocurrió un aumento
 
     def __str__(self):
         return f'Histórico de {self.producto.nombre} - {self.producto.supermercado.nombre}'

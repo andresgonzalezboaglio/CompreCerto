@@ -116,7 +116,7 @@ def guardar_productos_asun(productos, supermercado):
                     categoria=producto_existente.categoria,
                     supermercado=supermercado,
                     fecha_captura=timezone.now(),
-                    fecha_aumento=timezone.now() if precio > precio_anterior else None
+                    fecha_variacion=timezone.now() if precio > precio_anterior else None
                 )
 
             # Si solo cambió la disponibilidad, lo guardamos
@@ -133,7 +133,6 @@ def guardar_productos_asun(productos, supermercado):
                 cantidad=cantidad,
                 unidad_medida=unidad_medida,
                 fecha_captura=timezone.now(),
-                fecha_aumento=None,
                 is_active=is_active  # Establecer como activo al crearlo
             )
 
