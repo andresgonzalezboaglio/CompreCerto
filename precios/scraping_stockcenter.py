@@ -119,7 +119,7 @@ def guardar_productos_stock_center():
                         unidad_medida=unidad_medida,
                         supermercado=supermercado,
                         fecha_captura=timezone.now(),
-                        fecha_variacion=timezone.now() if precio > precio_anterior else None
+                        fecha_variacion=timezone.now()  # Siempre actualizar el timestamp
                     )
                 else:
                     # Si el precio no ha cambiado, solo actualizamos is_active
