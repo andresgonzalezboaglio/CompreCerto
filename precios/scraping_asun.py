@@ -93,7 +93,6 @@ def guardar_productos_asun(productos, supermercado):
         # Verificar si el producto ya existe
         if producto_existente:
             # Actualizar is_active basado en la disponibilidad del producto
-            is_active_changed = producto_existente.is_active != is_active
             producto_existente.is_active = is_active
 
             # Verificar si el precio ha cambiado
@@ -116,12 +115,11 @@ def guardar_productos_asun(productos, supermercado):
                     categoria=producto_existente.categoria,
                     supermercado=supermercado,
                     fecha_captura=timezone.now(),
-                    fecha_variacion=timezone.now() if precio > precio_anterior else None
+                    fecha_variacion=timezone.now()  # Actualizar siempre el timestamp
                 )
-
-            # Si solo cambió la disponibilidad, lo guardamos
-            if is_active_changed:
-                producto_existente.save()  # Guardar el cambio de is_active
+            else:
+                # Solo actualizar is_active si es diferente
+                producto_existente.save()
 
         else:
             # Si el producto no existe, crearlo
