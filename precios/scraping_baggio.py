@@ -36,7 +36,7 @@ def obtener_detalle_producto(url_producto):
 
         return {
             'nombre': nombre,
-            'precio': precio_actual,  # Asegurarse de que el precio sea Decimal
+            'precio': precio_actual,
             'id_origen': id_origen,
             'cantidad': cantidad,
             'unidad_medida': unidad_medida,
@@ -91,10 +91,11 @@ def guardar_precios_baggio():
 
         for producto in productos:
             nombre = producto['nombre'].upper()
-            precio = producto['precio']  # El precio ya es Decimal
+            precio = producto['precio']
             id_origen = producto['id_origen']
             cantidad = producto['cantidad']
-            unidad_medida = producto.get('unidad_medida')  # Usamos get para evitar KeyError
+            unidad_medida = producto.get('unidad_medida')
+
             if unidad_medida is not None:
                 unidad_medida = unidad_medida.upper()
             else:
@@ -106,20 +107,18 @@ def guardar_precios_baggio():
                 supermercado=supermercado
             ).first()
 
-            # Verificar si el producto ya existe y si el precio cambió
             if producto_existente:
                 # Actualizar is_active basado en la disponibilidad del producto
                 producto_existente.is_active = True  # Siempre será True si está en el response
 
-                # Si el precio es el mismo, no hacer nada
-                if producto_existente.precio_actual == precio:
-                    producto_existente.save()  # Asegúrate de guardar el cambio de is_active
-                    continue
-
-                # Si el precio cambió, actualizar y guardar en el historial
+                # Verificar si el precio ha cambiado
                 precio_anterior = producto_existente.precio_actual
 
-                # Actualizar el producto en la tabla Producto
+                if precio_anterior == precio:
+                    producto_existente.save()  # Asegúrate de guardar el cambio de is_active
+                    continue  # Si el precio es el mismo, no hacer nada
+
+                # Si el precio cambió, actualizar y guardar en el historial
                 producto_existente.precio_actual = precio
                 producto_existente.fecha_captura = timezone.now()
                 producto_existente.save()
@@ -134,7 +133,7 @@ def guardar_precios_baggio():
                     unidad_medida=unidad_medida,
                     supermercado=supermercado,
                     fecha_captura=timezone.now(),
-                    fecha_variacion=timezone.now() if precio > precio_anterior else None
+                    fecha_variacion=timezone.now()  # Registrar siempre la fecha de variación
                 )
             else:
                 # Si el producto no existe, crearlo
