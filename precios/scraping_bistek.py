@@ -12,10 +12,10 @@ import re
 
 # Lista de User-Agents para rotar entre las solicitudes
 USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.198 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/114.0.5735.198 Safari/537.36',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.5359.124 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, como Gecko) Version/15.1 Safari/605.1.15',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/108.0.5359.124 Safari/537.36',
 ]
 
 
@@ -48,7 +48,6 @@ def obtener_precios_bistek(searchTerm):
         try:
             response = requests.get(f"{url}&page={pagina_actual}", headers=headers, timeout=10)
 
-            # Verificar si la solicitud fue exitosa
             if response.status_code == 200:
                 soup = BeautifulSoup(response.content, 'html.parser')
                 script_tags = soup.find_all('script')
@@ -59,9 +58,9 @@ def obtener_precios_bistek(searchTerm):
                         if 'itemListElement' in data:
                             productos = data.get('itemListElement', [])
 
-                            if not productos:  # Manejo del array vacío
+                            if not productos:
                                 print(f"No se encontraron productos para el término '{searchTerm}' en la página {pagina_actual}.")
-                                return productos_extraidos  # Retorna la lista vacía
+                                return productos_extraidos
 
                             for item in productos:
                                 producto = item.get('item', {})
@@ -111,25 +110,9 @@ def guardar_precios_bistek():
         direccion="R. Amazonas, 810 - Torres, RS, 95560-000"
     )
 
-    # Obtener productos existentes con is_active=True
-    productos_existentes = Producto.objects.filter(supermercado=supermercado, is_active=True)
-    productos_activos_ids = {producto.id_origen for producto in productos_existentes}
-
     for searchTerm in searchTerms:
         productos = obtener_precios_bistek(searchTerm)
         productos_guardados = 0
-
-        # Crear un conjunto de IDs de productos que están actualmente disponibles
-        productos_nuevos_ids = {producto['id_origen'] for producto in productos}
-
-        # Actualizar is_active a False para productos que ya no están disponibles
-        for id_origen in productos_activos_ids:
-            if id_origen not in productos_nuevos_ids:
-                Producto.objects.filter(id_origen=id_origen, supermercado=supermercado).update(is_active=False)
-
-        # Actualizar is_active a True para productos que están de nuevo disponibles
-        for id_origen in productos_nuevos_ids:
-            Producto.objects.filter(id_origen=id_origen, supermercado=supermercado).update(is_active=True)
 
         for producto in productos:
             nombre = producto['nombre'].upper()
@@ -137,7 +120,8 @@ def guardar_precios_bistek():
             precio = producto['precio']
             id_origen = producto['id_origen']
             cantidad = producto['cantidad']
-            unidad_medida = producto.get('unidad_medida')  # Usamos get para evitar KeyError
+            unidad_medida = producto.get('unidad_medida')
+
             if unidad_medida is not None:
                 unidad_medida = unidad_medida.upper()
             else:
@@ -149,12 +133,16 @@ def guardar_precios_bistek():
                 supermercado=supermercado
             ).first()
 
-            # Verificar si el producto ya existe y si el precio cambió
             if producto_existente:
+                # Verificar si el precio ha cambiado
                 precio_anterior = convertir_precio(producto_existente.precio_actual)
 
+                # Actualizar is_active a True si el producto está disponible en el response
+                producto_existente.is_active = True
+
                 if precio_anterior == precio:
-                    continue  # Si el precio es el mismo, no hacer nada
+                    producto_existente.save()  # Solo actualizamos is_active si el precio no ha cambiado
+                    continue  # Si el precio es el mismo, no hacemos nada
 
                 # Actualizar y guardar en el historial si el precio cambió
                 producto_existente.precio_actual = precio
@@ -172,11 +160,10 @@ def guardar_precios_bistek():
                     unidad_medida=unidad_medida,
                     supermercado=supermercado,
                     fecha_captura=timezone.now(),
-                    fecha_variacion=timezone.now() if precio > precio_anterior else None
+                    fecha_variacion=timezone.now()  # Siempre registrar la fecha de variación
                 )
-
             else:
-                # Crear el producto si no existe
+                # Si el producto no existe, crearlo
                 Producto.objects.create(
                     id_origen=id_origen,
                     supermercado=supermercado,
@@ -186,7 +173,7 @@ def guardar_precios_bistek():
                     cantidad=cantidad,
                     unidad_medida=unidad_medida,
                     fecha_captura=timezone.now(),
-                    is_active=True  # Asegúrate de establecerlo como activo al crearlo
+                    is_active=True  # Asegurarse de establecerlo como activo al crearlo
                 )
 
             productos_guardados += 1
