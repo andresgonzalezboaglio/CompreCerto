@@ -1,5 +1,5 @@
 # search_terms.py
 
 searchTerms = [
-        "fosforo"
+        "carne moida"
     ]
