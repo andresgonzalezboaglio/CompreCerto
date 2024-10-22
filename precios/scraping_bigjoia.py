@@ -154,7 +154,7 @@ def guardar_precios_bigjoia():
                     categoria=categoria,
                     supermercado=supermercado,
                     fecha_captura=timezone.now(),
-                    fecha_variacion=timezone.now() if precio > precio_anterior else None
+                    fecha_variacion=timezone.now()  # Registrar siempre la fecha de variación
                 )
             else:
                 # Si el producto no existe, crearlo
