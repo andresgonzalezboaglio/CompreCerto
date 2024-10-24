@@ -2,5 +2,5 @@
 
 searchTerms = \
     [
-        "pirelli"
+        "leite", "pao", "creme", "queijo", "frango", "sabao", "refrigerante"
     ]
